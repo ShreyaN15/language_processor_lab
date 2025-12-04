@@ -1,3 +1,5 @@
+//this code is for the case in which q4 is the only final state
+
 #include <stdio.h>
 #include <string.h>
 #include <conio.h>
