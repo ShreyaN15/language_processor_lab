@@ -1,0 +1,10 @@
+TEST    START   1000
+        LDA     ALPHA
+        STA     BETA
+TEMP    BYTE    C'X'
+ALPHA   WORD    5
+BETA    RESW    3
+MSG     BYTE    C'OK'
+NUM     BYTE    X'F1AB'
+BUFFER  RESB    10
+        END     TEST

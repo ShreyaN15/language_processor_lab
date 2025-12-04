@@ -1,0 +1,13 @@
+Macro Call #1: ABC
+ARG[0] = P
+ARG[1] = Q
+
+Macro Call #2: ABC
+ARG[0] = R
+ARG[1] = S
+
+Macro Call #1: XYZ
+ARG[0] = M
+ARG[1] = N
+ARG[2] = O
+

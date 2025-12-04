@@ -1,0 +1,7 @@
+ABC MACRO &A &B 
+STA ?0 
+STB ?1 
+XYZ MACRO &X &Y &Z 
+LDA ?0 
+ADD ?1 
+STA ?2 

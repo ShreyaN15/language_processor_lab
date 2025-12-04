@@ -1,0 +1,18 @@
+PGMI START 0
+
+ABC MACRO &A,&B
+    STA &A
+    STB &B
+MEND
+
+XYZ MACRO &X,&Y,&Z
+    LDA &X
+    ADD &Y
+    STA &Z
+MEND
+
+    ABC P,Q
+    ABC R,S
+    XYZ M,N,O
+
+    END

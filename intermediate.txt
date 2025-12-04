@@ -1,0 +1,12 @@
+1000	TEST    	START 	1000
+1000	        	LDA   	ALPHA
+1003	        	STA   	BETA
+1006	TEMP    	BYTE  	C'X'
+1007	ALPHA   	WORD  	5
+100A	BETA    	RESW  	3
+1013	MSG     	BYTE  	C'OK'
+1015	NUM     	BYTE  	X'F1AB'
+1017	BUFFER  	RESB  	10
+1021	        	END   	TEST
+
+Program Length: 0021

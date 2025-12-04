@@ -1,0 +1,137 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+int mai        if (strcmp(opcode, "BYTE") == 0) {
+            if (operand[0] == 'C') {
+                // Convert characters to hex
+                textrec[strlen(textrec)] = '^';  // Add separator
+                for (int i = 2; operand[i] != '\''; i++) {
+                    char temp[3];
+                    sprintf(temp, "%02X", operand[i]);
+                    strcat(textrec, temp);
+                }
+                tlength += 1;  // Each character takes 1 byte
+            } else if (operand[0] == 'X') {
+                textrec[strlen(textrec)] = '^';  // Add separator
+                strncat(textrec, operand + 2, strlen(operand) - 3);
+                tlength += (strlen(operand) - 3) / 2;  // Each byte is 2 hex digits
+            }
+        }1, *fp2, *fp3, *fp4;
+    char label[20], opcode[20], operand[20];
+    char code[20], mnemonic[20], objcode[20];
+    int start, loc, tstart, tlength;
+    char textrec[1000] = "";
+
+    // Open files
+    fp1 = fopen("intermediate.txt", "r"); // from Pass 1
+    fp2 = fopen("optab.txt", "r");        // OPTAB
+    fp3 = fopen("symtab.txt", "r");       // SYMTAB
+    fp4 = fopen("objprog.txt", "w");      // Final object program
+
+    if (!fp1 || !fp2 || !fp3 || !fp4) {
+        printf("Error opening files.\n");
+        exit(1);
+    }
+
+    // Read first line to check for START
+    fscanf(fp1, "%x %s %s %s", &loc, label, opcode, operand);
+    if (strcmp(opcode, "START") == 0) {
+        start = strtol(operand, NULL, 16);
+        fprintf(fp4, "H^%s^%06X^000020^\n", label, start);  // Added program length
+        fscanf(fp1, "%x %s %s %s", &loc, label, opcode, operand);
+    } else {
+        start = 0;
+    }
+
+    tstart = loc;
+    tlength = 0;
+    textrec[0] = '\0';
+
+    while (strcmp(opcode, "END") != 0) {
+        int found = 0;
+        rewind(fp2);
+        while (fscanf(fp2, "%s %s", code, mnemonic) != EOF) {
+            if (strcmp(opcode, code) == 0) {
+                found = 1;
+                break;
+            }
+        }
+
+        if (found) {
+            // Search symbol address
+            rewind(fp3);
+            int symaddr = -1;
+            char sym[20];
+            unsigned int addr;
+            while (fscanf(fp3, "%s %x", sym, &addr) != EOF) {
+                if (strcmp(sym, operand) == 0) {
+                    symaddr = addr;
+                    break;
+                }
+            }
+            if (symaddr != -1) {
+                sprintf(objcode, "%s%04X", mnemonic, symaddr);
+                strcat(textrec, objcode);
+                strcat(textrec, "^");
+                tlength += 3;
+            }
+        }
+        else if (strcmp(opcode, "WORD") == 0) {
+            sprintf(objcode, "%06X", atoi(operand));
+            strcat(textrec, objcode);
+            strcat(textrec, "^");
+            tlength += 3;
+        }
+        else if (strcmp(opcode, "BYTE") == 0) {
+            if (operand[0] == 'C') {
+                for (int i = 2; i < strlen(operand) - 1; i++) {
+                    char temp[5];
+                    sprintf(temp, "%02X", operand[i]);
+                    strcat(textrec, temp);
+                }
+                strcat(textrec, "^");
+                tlength += strlen(operand) - 3;
+            }
+            else if (operand[0] == 'X') {
+                char temp[10];
+                strncpy(temp, operand + 2, strlen(operand) - 3);
+                temp[strlen(operand) - 3] = '\0';
+                strcat(textrec, temp);
+                strcat(textrec, "^");
+                tlength += (strlen(operand) - 3) / 2;
+            }
+        }
+        else if (strcmp(opcode, "RESW") == 0 || strcmp(opcode, "RESB") == 0) {
+            if (tlength > 0) {
+                fprintf(fp4, "T^%06X^%02X^%s\n", tstart, tlength, textrec);
+                tlength = 0;
+                textrec[0] = '\0';
+            }
+            fscanf(fp1, "%x %s %s %s", &loc, label, opcode, operand);
+            tstart = loc;
+            continue;
+        }
+
+        if (fscanf(fp1, "%x %s %s %s", &loc, label, opcode, operand) != 4)
+            break;
+
+        if (tlength == 0) {
+            tstart = loc;
+        }
+    }
+
+    if (tlength > 0) {
+        fprintf(fp4, "T^%06X^%02X^%s\n", tstart, tlength, textrec);
+    }
+
+    fprintf(fp4, "E^%06X^\n", start);
+
+    fclose(fp1);
+    fclose(fp2);
+    fclose(fp3);
+    fclose(fp4);
+
+    printf("Pass 2 completed. Object program generated in objprog.txt\n");
+    return 0;
+}
