@@ -57,7 +57,7 @@ int q2() {
 }
 
 int q3() {
-    if (inp[i] == '\0') return 0;
+    if (inp[i] == '\0') return 1;
     printf("State q3, input: %c --> ", inp[i]);
     if (inp[i] == '0') {
         printf("moving to q3\n");
